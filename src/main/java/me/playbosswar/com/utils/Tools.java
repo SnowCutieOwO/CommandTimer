@@ -11,13 +11,14 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class Tools {
+
     /**
      * Show current time & day
      */
     public static void printDate() {
         final LocalDate date = LocalDate.now();
         final DayOfWeek dow = date.getDayOfWeek();
-        final String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        final String time = getTimeString((int) new Date().getTime() / 1000);
         Messages.sendConsole("&aServer time :&e " + time);
         Messages.sendConsole("&aServer day :&e " + dow);
     }
