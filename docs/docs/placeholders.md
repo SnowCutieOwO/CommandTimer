@@ -17,7 +17,7 @@ to replace `task` with your actual task name.
   choice. A list of possible combinations is available [here](https://day.js.org/docs/en/display/format). If you want to
   escape certain characters you can use `'` around the character you want to escape. For a time format `12h34m03s` you
   will need the placeholder `%commandtimer_task_HH'h'mm'm'ss's'%`. Depending on your configuration file, you will need
-  to change your outer `'` quotes with `"` to keep a valid configuration.
+  to change your outer `'` quotes with `"` to keep a valid configuration. **Do not use hh in your custom format, use HH instead**
 
 ## Fallback values
 

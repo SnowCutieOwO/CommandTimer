@@ -278,6 +278,11 @@ public class Task {
         return true;
     }
 
+    // -1 means no next execution
+//    private int getNextExecution() {
+//
+//    }
+
     public void storeInstance() {
         GsonConverter gson = new GsonConverter();
         String json = gson.toJson(this);

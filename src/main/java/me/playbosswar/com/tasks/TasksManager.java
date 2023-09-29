@@ -300,6 +300,21 @@ public class TasksManager {
         return selectedCommandIndex;
     }
 
+    @Nullable
+    public Task getNextTask() {
+        boolean firstIsTime = false;
+        Task firstTask = null;
+
+        loadedTasks.forEach(task -> {
+            if(!task.getTimes().isEmpty()) {
+
+            }
+
+        });
+
+        return firstTask;
+    }
+
     public void disable() {
         List<Task> tasksToStore = loadedTasks.stream().filter(Task::isActive).collect(Collectors.toList());
         tasksToStore.forEach(Task::storeInstance);

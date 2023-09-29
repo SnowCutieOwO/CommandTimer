@@ -9,6 +9,7 @@ import me.playbosswar.com.utils.TaskTimeUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
@@ -51,15 +52,22 @@ public class PAPIPlaceholders extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier) {
         String[] identifierParts = identifier.split("_");
 
-        if(identifierParts.length < 2) {
-            Messages.sendConsole("Used a CommandTimer placeholder wrong. Example: " +
-                    "%commandtimer_testtask_nextExecutionFormat%");
-            return null;
-        }
+        // %commandtimer_nextExecution%
+        // %commandtimer_nextExecutionFormat_No next execution%
+
+//        if(identifierParts.length < 2) {
+//            Messages.sendConsole("Used a CommandTimer placeholder wrong. Example: " +
+//                    "%commandtimer_testtask_nextExecutionFormat%");
+//            return null;
+//        }
 
         String commandName = identifierParts[0];
-        String commandField = identifierParts[1];
+        String commandField = null;
         String fallbackMessage = null;
+
+        if(identifierParts.length > 1) {
+            commandField = identifierParts[1];
+        }
 
         if(identifierParts.length == 3) {
             fallbackMessage = identifierParts[2];
@@ -67,81 +75,51 @@ public class PAPIPlaceholders extends PlaceholderExpansion {
 
         Task task = CommandTimerPlugin.getInstance().getTasksManager().getTaskByName(commandName);
 
+        // Separate logic when no task is specified, fetch next task
+        if(commandName.equals("nextExecution")) {
+
+        }
+
         if(task == null) {
             Messages.sendConsole("Tried to use PAPI placeholder for unknown command:" + identifier);
             return null;
         }
 
         if(commandField.equalsIgnoreCase("seconds")) {
-            int seconds = task.getInterval().toSeconds();
-
-            if(seconds < 0 && fallbackMessage != null) {
-                return fallbackMessage;
-            }
-
-            return seconds + "";
+            return getSecondsLabel(task, fallbackMessage, false);
         }
 
         if(commandField.equalsIgnoreCase("secondsFormat")) {
-            int seconds = task.getInterval().toSeconds();
-
-            if(seconds < 0 && fallbackMessage != null) {
-                return fallbackMessage;
-            }
-
-            return Tools.getTimeString(seconds);
+            return getSecondsLabel(task, fallbackMessage, true);
         }
 
         if(commandField.equalsIgnoreCase("nextExecution")) {
-            if(!task.getTimes().isEmpty()) {
-                Date date = TaskTimeUtils.getSoonestTaskTime(task.getTimes());
-
-                if(date == null || !task.isActive()) {
-                    return fallbackMessage != null ? fallbackMessage : "";
-                }
-
-                long seconds = (date.getTime() - new Date().getTime()) / 1000;
-
-                return seconds + "";
-            }
-
-            Interval interval = new Interval(task.getLastExecuted().getTime(), new Date().getTime());
-            Duration period = interval.toDuration();
-            int seconds = task.getInterval().toSeconds();
-            long timeLeft = seconds - period.getStandardSeconds();
-
-            if((timeLeft < 0 || !task.isActive()) && fallbackMessage != null) {
-                return fallbackMessage;
-            }
-
-            return timeLeft + "";
+            return getNextExecutionLabel(task, fallbackMessage, false, null);
         }
 
         if(commandField.equalsIgnoreCase("nextExecutionFormat")) {
-            if(!task.getTimes().isEmpty()) {
-                Date date = TaskTimeUtils.getSoonestTaskTime(task.getTimes());
-
-                if(date == null || !task.isActive()) {
-                    return fallbackMessage != null ? fallbackMessage : "";
-                }
-
-                long seconds = (date.getTime() - new Date().getTime()) / 1000;
-
-                return Tools.getTimeString((int) seconds);
-            }
-
-            Interval interval = new Interval(task.getLastExecuted().getTime(), new Date().getTime());
-            Duration period = interval.toDuration();
-            int seconds = task.getInterval().toSeconds();
-            long timeLeft = seconds - period.getStandardSeconds();
-
-            if((timeLeft < 0 || !task.isActive()) && fallbackMessage != null) {
-                return fallbackMessage;
-            }
-
-            return Tools.getTimeString((int) timeLeft);
+            return getNextExecutionLabel(task, fallbackMessage, true, null);
         }
 
+        return getNextExecutionLabel(task, fallbackMessage, false, commandField);
+    }
+
+    private String getSecondsLabel(Task task, String fallbackMessage, boolean shouldFormat) {
+        int seconds = task.getInterval().toSeconds();
+
+        if(seconds < 0 && fallbackMessage != null) {
+            return fallbackMessage;
+        }
+
+        if(shouldFormat) {
+            return Tools.getTimeString(seconds);
+        }
+
+        return seconds + "";
+    }
+
+    private String getNextExecutionLabel(Task task, String fallbackMessage, boolean shouldFormat,
+                                         @Nullable String commandField) {
         if(!task.getTimes().isEmpty()) {
             Date date = TaskTimeUtils.getSoonestTaskTime(task.getTimes());
 
@@ -151,19 +129,29 @@ public class PAPIPlaceholders extends PlaceholderExpansion {
 
             long seconds = (date.getTime() - new Date().getTime()) / 1000;
 
-            return Tools.getTimeString((int) seconds, commandField);
+            if(shouldFormat) {
+                return Tools.getTimeString((int) seconds);
+            }
+
+            return seconds + "";
         }
 
         Interval interval = new Interval(task.getLastExecuted().getTime(), new Date().getTime());
         Duration period = interval.toDuration();
-        int seconds = task.getInterval().toSeconds();
-        long timeLeft = seconds - period.getStandardSeconds();
+        long timeLeft = task.getInterval().toSeconds() - period.getStandardSeconds();
 
         if((timeLeft < 0 || !task.isActive()) && fallbackMessage != null) {
             return fallbackMessage;
         }
 
+        if(commandField != null) {
+            return Tools.getTimeString((int) timeLeft, commandField);
+        }
 
-        return Tools.getTimeString((int) timeLeft, commandField);
+        if(shouldFormat) {
+            return Tools.getTimeString((int) timeLeft);
+        }
+
+        return timeLeft + "";
     }
 }
