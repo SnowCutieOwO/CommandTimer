@@ -1,7 +1,5 @@
 package me.playbosswar.com.language;
 
-import java.util.Arrays;
-
 public enum LanguageKey {
     PREFIX,
     NO_CONSOLE,
@@ -149,8 +147,4 @@ public enum LanguageKey {
     USED_MINECRAFT_WORLD,
     PLUGIN_RELOADED,
     MINECRAFT_TIME;
-
-    public static LanguageKey getByTag(String tag) {
-        return Arrays.stream(values()).filter(value -> value.toString().equals(tag.toUpperCase())).findFirst().orElse(null);
-    }
 }

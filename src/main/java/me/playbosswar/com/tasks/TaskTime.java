@@ -16,6 +16,13 @@ public class TaskTime {
         this.isMinecraftTime = isMinecraftTime;
     }
 
+    public TaskTime(Task task, LocalTime time1, LocalTime time2, boolean isMinecraftTime) {
+        this.task = task;
+        this.time1 = time1;
+        this.time2 = time2;
+        this.isMinecraftTime = isMinecraftTime;
+    }
+
     public LocalTime getTime1() {
         return time1;
     }

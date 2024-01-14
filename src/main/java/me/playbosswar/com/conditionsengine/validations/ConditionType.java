@@ -14,7 +14,11 @@ public enum ConditionType {
 
     ConditionType(LanguageKey languageKey) {
         final LanguageManager languageManager = CommandTimerPlugin.getLanguageManager();
-        this.description = languageManager.get(languageKey);
+        if(languageManager == null) {
+            this.description = languageKey.toString();
+        } else {
+            this.description = languageManager.get(languageKey);
+        }
     }
 
     public String getDescription() {

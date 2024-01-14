@@ -2,22 +2,16 @@ package me.playbosswar.com.hooks;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.playbosswar.com.CommandTimerPlugin;
-import me.playbosswar.com.tasks.TaskTime;
-import me.playbosswar.com.utils.TaskUtils;
+import me.playbosswar.com.utils.TaskTimeUtils;
 import me.playbosswar.com.utils.Tools;
 import me.playbosswar.com.tasks.Task;
 import me.playbosswar.com.utils.Messages;
-import me.playbosswar.com.utils.TaskTimeUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 public class PAPIPlaceholders extends PlaceholderExpansion {
@@ -108,33 +102,8 @@ public class PAPIPlaceholders extends PlaceholderExpansion {
         return seconds + "";
     }
 
-    // Get time in seconds before next task execution
-    private long getNextExecution(Task task) {
-        // TODO: Take into account the days
-        // TODO: Take into account the hour ranges
-        if(!task.getTimes().isEmpty()) {
-            Date date = TaskTimeUtils.getSoonestTaskTime(task.getTimes());
-
-            if(date == null || !task.isActive()) {
-                return -1;
-            }
-
-            return (date.getTime() - new Date().getTime()) / 1000;
-        }
-
-        Interval interval = new Interval(task.getLastExecuted().getTime(), new Date().getTime());
-        Duration period = interval.toDuration();
-        long timeLeft = task.getInterval().toSeconds() - period.getStandardSeconds();
-
-        if((timeLeft < 0 || !task.isActive())) {
-            return -1;
-        }
-
-        return timeLeft;
-    }
-
     private String getNextExecutionText(Task task, String fallbackMessage, boolean format, String timeFormat) {
-        long seconds = getNextExecution(task);
+        long seconds = PlaceholderUtils.getNextExecution(task);
 
         if(seconds == -1) {
             return fallbackMessage != null ? fallbackMessage : "";
@@ -155,7 +124,7 @@ public class PAPIPlaceholders extends PlaceholderExpansion {
     private Task getSoonestTask(List<Task> tasks) {
         Map<Task, Long> timeTillExecution = new HashMap<>();
         tasks.forEach(t -> {
-            long seconds = getNextExecution(t);
+            long seconds = PlaceholderUtils.getNextExecution(t);
             if(seconds > 0) {
                 timeTillExecution.put(t, seconds);
             }
