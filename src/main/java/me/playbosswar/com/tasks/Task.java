@@ -3,6 +3,7 @@ package me.playbosswar.com.tasks;
 import io.sentry.ITransaction;
 import io.sentry.Sentry;
 import io.sentry.SpanStatus;
+import me.playbosswar.com.CommandTimerPlugin;
 import me.playbosswar.com.api.events.EventConfiguration;
 import me.playbosswar.com.conditionsengine.validations.Condition;
 import me.playbosswar.com.conditionsengine.validations.ConditionType;
@@ -10,6 +11,9 @@ import me.playbosswar.com.conditionsengine.validations.SimpleCondition;
 import me.playbosswar.com.enums.CommandExecutionMode;
 import me.playbosswar.com.utils.Files;
 import me.playbosswar.com.utils.gson.GsonConverter;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -282,6 +286,13 @@ public class Task {
     }
 
     public void storeInstance() {
+        if(CommandTimerPlugin.getConnection() != null) {
+            DSLContext create = DSL.using(CommandTimerPlugin.getConnection(), SQLDialect.MYSQL);
+
+            create.newRecord("task", this);
+            create.executeInsert(DSL.table("tasks"), this);
+        }
+
         ITransaction transaction = Sentry.startTransaction("storeInstance()", "task");
         GsonConverter gson = new GsonConverter();
         String json = gson.toJson(this);

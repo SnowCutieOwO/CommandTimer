@@ -4,3 +4,8 @@ showUpdateMessage: true
 timezoneOverwrite: false
 timezoneOverwriteValue: 'GMT'
 language: 'en'
+database:
+  enabled: false
+  url: 'jdbc:mysql://localhost:3306/commandtimer'
+  username: 'root'
+  password: ''

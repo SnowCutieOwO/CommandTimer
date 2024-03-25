@@ -21,6 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,7 @@ public class CommandTimerPlugin extends JavaPlugin implements Listener {
     public static Metrics metrics;
     public static Updater updater;
     public static LanguageManager languageManager;
+    public static Connection connection;
 
     @Override
     public void onEnable() {
@@ -70,6 +73,19 @@ public class CommandTimerPlugin extends JavaPlugin implements Listener {
         conditionEngineManager = new ConditionEngineManager();
         eventsManager = new EventsManager(tasksManager);
         inventoryManager.init();
+
+        if(getConfig().getBoolean("database.enabled")) {
+            String url = getConfig().getString("database.url");
+            String userName = getConfig().getString("database.username");
+            String password = getConfig().getString("database.password");
+
+            try {
+                Connection conn = DriverManager.getConnection(url, userName, password);
+                this.connection = conn;
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         metrics.addCustomChart(new Metrics.SingleLineChart("loaded_tasks", () -> tasksManager.getLoadedTasks().size()));
         metrics.addCustomChart(new Metrics.SingleLineChart("executed_tasks", () -> {
@@ -176,5 +192,9 @@ public class CommandTimerPlugin extends JavaPlugin implements Listener {
 
     public static LanguageManager getLanguageManager() {
         return languageManager;
+    }
+
+    public static Connection getConnection() {
+        return connection;
     }
 }

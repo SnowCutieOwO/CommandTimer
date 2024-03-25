@@ -51,6 +51,9 @@ dependencies {
     implementation 'com.googlecode.json-simple:json-simple:1.1.1'
     implementation 'org.apache.commons:commons-text:1.10.0'
     implementation 'io.sentry:sentry:7.0.0'
+    implementation 'org.jooq:jooq:3.19.3'
+    implementation 'org.jooq:jooq-meta:3.19.6'
+    implementation 'org.jooq:jooq-codegen:3.19.6'
     compileOnly 'io.papermc.paper:paper-api:1.20.2-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly 'org.jetbrains:annotations:23.1.0'
@@ -64,6 +67,39 @@ publishing {
             version = '8.5.5'
 
             from components.java
+        }
+    }
+}
+
+configuration {
+    jdbc {
+        driver = "oracle.jdbc.OracleDriver"
+        url = "jdbc:oracle:thin:@localhost:3066"
+        user = "root"
+        password = "password"
+    }
+    generator {
+        database {
+            // You can also provide your own org.jooq.meta.Database implementation
+            // here, if your database is currently not supported
+            name = "org.jooq.meta.oracle.OracleDatabase"
+            includes = ".*"
+
+
+            // The schema that is used locally as a source for meta information.
+            // This could be your development schema or the production schema, etc
+            // This cannot be combined with the schemata element.
+            //
+            // If left empty, jOOQ will generate all available schemata. See the
+            // manual's next section to learn how to generate several schemata
+            inputSchema = ""
+        }
+        generate {}
+        target {
+            packageName = "me.playbosswar.com.database"
+
+            // The destination directory of your generated classes
+            directory = "/path/to/your/dir"
         }
     }
 }

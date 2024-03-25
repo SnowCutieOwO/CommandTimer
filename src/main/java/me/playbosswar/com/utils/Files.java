@@ -13,6 +13,11 @@ import me.playbosswar.com.utils.gson.GsonConverter;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jooq.DSLContext;
+import org.jooq.Query;
+import org.jooq.Result;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -95,7 +100,14 @@ public class Files {
         }
     }
 
+    public static List<Task> deserializeSqlIntoCommandTimers() {
+        DSLContext create = DSL.using(CommandTimerPlugin.getConnection(), SQLDialect.MYSQL);
+
+        return create.select().from("tasks").fetchInto(Task.class);
+    }
+
     public static List<Task> deserializeJsonFilesIntoCommandTimers() {
+        // TODO: If SQL, read from SQL
         ITransaction transaction = Sentry.startTransaction("deserializeJsonFilesIntoCommandTimers()", "initiation");
         File dir = new File(pluginFolderPath + "/timers");
         File[] directoryListing = dir.listFiles();
